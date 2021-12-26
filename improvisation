@@ -1,0 +1,72 @@
+using System;
+
+namespace Names
+{
+    internal static class AdditionalTask
+    {
+        public static int yearMin;
+        public static int yearMax;
+        public static bool littleLengthy = false;
+
+        public static HistogramData ShowYourStatistics(NameData[] namesData)
+        {
+            GetMaxAndMinYear(namesData);
+            return new HistogramData(
+                String.Format("The most {0} name by year", littleLengthy ? "short" : "long"),
+                GetNames(namesData),
+                GetLengths(namesData)
+            );
+        }
+
+        private static double[] GetLengths(NameData[] names)
+        {
+            var lengthName = new double[yearMax - yearMin + 1];
+            foreach (var data in names)
+            {
+                var index = data.BirthDate.Year - yearMin;
+                if (littleLengthy)
+                    lengthName[index] = Math.Max(lengthName[index], data.Name.Length);
+                else
+                {
+                    if (lengthName[index] == 0)
+                        lengthName[index] = data.Name.Length;
+                    else
+                        lengthName[index] = Math.Min(lengthName[index], data.Name.Length);
+                }
+            }
+            return lengthName;
+        }
+
+        private static string[] GetNames(NameData[] names)
+        {
+            var listNames = new string[yearMax - yearMin + 1];
+            foreach (var data in names)
+            {
+                var index = data.BirthDate.Year - yearMin;
+                var name1 = data.Name;
+                var name2 = listNames[index];
+
+                if (name2 == null)
+                    name2 = name1;
+                if (littleLengthy)
+                    listNames[index] = name1.Length > name2.Length ? name1 : name2;
+                else
+                    listNames[index] = name1.Length < name2.Length ? name1 : name2;
+            }
+            for (int i = 0; i < listNames.Length; i++)
+                listNames[i] += " : " + (yearMin + i);
+            return listNames;
+        }
+
+        private static void GetMaxAndMinYear(NameData[] names)
+        {
+            yearMin = int.MaxValue;
+            yearMax = int.MinValue;
+            foreach (var name in names)
+            {
+                yearMin = Math.Min(yearMin, name.BirthDate.Year);
+                yearMax = Math.Max(yearMax, name.BirthDate.Year);
+            }
+        }
+    }
+}
